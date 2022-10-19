@@ -5,7 +5,7 @@
 - Requires you to Run Script file ADMINISTRATOR! (if you don't use launch command)
 
 ## Launch Command:
-
+- Run command on Powershell
 ```bash
 irm padsalatushal.github.io/edge.bat | iex
 ```
