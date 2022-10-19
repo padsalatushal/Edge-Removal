@@ -7,7 +7,11 @@
 ## Launch Command:
 
 ```bash
-
+ irm padsalatushal.github.io/edge.bat | iex
+```
+Or
+```bash
+iwr -useb https://padsalatushal.github.io/edge.bat | iex
 ```
 
 ## Resources 
