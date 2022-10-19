@@ -1,10 +1,15 @@
 # Edge-Removal
 
-This script remove edge completly from windows
+## Discription
+- This script remove edge completly from windows
+- Requires you to launch PowerShell or Windows Terminal As ADMINISTRATOR!
 
-This script need Admin Priviledge to run
+## Launch Command:
 
-This script is special made & use for adding option to remove edge in winutil tool 
-  https://github.com/ChrisTitusTech/winutil
+```bash
 
-Source : https://github.com/AveYo/fox
+```
+
+## Resources 
+
+https://github.com/AveYo/fox
