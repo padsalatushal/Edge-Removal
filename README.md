@@ -5,6 +5,7 @@
 - Requires you to Run Script file ADMINISTRATOR! (if you don't use launch command)
 
 ## Demo
+![ezgif com-gif-maker](https://user-images.githubusercontent.com/57517785/200296891-13b724e5-e3c4-4224-9d32-d3eb9a59ab9d.gif)
 
 ## Launch Command (Powershell) :
 ```bash
