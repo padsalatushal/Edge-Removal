@@ -6,7 +6,7 @@
 
 ## Demo
 
-## Launch Command(Powershell) :
+## Launch Command (Powershell) :
 ```bash
 irm padsalatushal.github.io/edge.bat | iex
 ```
