@@ -1,6 +1,6 @@
 # Edge-Removal
 
-## Discription
+## Description
 - This script remove edge completely from windows
 - Requires you to Run Script file ADMINISTRATOR! (if you don't use launch command)
 
