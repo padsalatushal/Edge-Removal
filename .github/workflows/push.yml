@@ -14,7 +14,7 @@ jobs:
         uses: actions/checkout@v2
         with:
           repository: padsalatushal/padsalatushal.github.io
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.TOKEN }}
      
       - name: Copy code to target repository
         run: |
