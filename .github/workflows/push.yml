@@ -1,0 +1,27 @@
+name: Push Code to padsalatushal.github.io Repo
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  push_code:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout target repository
+        uses: actions/checkout@v2
+        with:
+          repository: https://github.com/padsalatushal/padsalatushal.github.io
+          token: ${{ secrets.GITHUB_TOKEN }}
+     
+     - name: Copy code to target repository
+        run: |
+          cp Edge_Removal.bat ./padsalatushal.github.io/edge.bat
+          cd padsalatushal.github.io
+          git add .
+          git config --local user.email "actions@github.com"
+          git config --local user.name "GitHub Actions"
+          git commit -m "Update code from source repository"
+          git push
