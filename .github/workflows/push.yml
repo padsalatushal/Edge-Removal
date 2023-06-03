@@ -16,7 +16,7 @@ jobs:
           repository: https://github.com/padsalatushal/padsalatushal.github.io
           token: ${{ secrets.GITHUB_TOKEN }}
      
-     - name: Copy code to target repository
+      - name: Copy code to target repository
         run: |
           cp Edge_Removal.bat ./padsalatushal.github.io/edge.bat
           cd padsalatushal.github.io
