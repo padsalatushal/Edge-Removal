@@ -20,8 +20,8 @@ jobs:
         run: |
           pwd
           ls
-          cp ./Edge_Removal.bat ./padsalatushal.github.io/edge.bat
-          cd padsalatushal.github.io
+          rm edge.bat
+          curl "https://raw.githubusercontent.com/padsalatushal/Edge-Removal/main/Edge_Removal.bat" -o edge.bat
           git add .
           git config --local user.email "actions@github.com"
           git config --local user.name "GitHub Actions"
