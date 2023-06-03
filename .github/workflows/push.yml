@@ -13,7 +13,7 @@ jobs:
       - name: Checkout target repository
         uses: actions/checkout@v2
         with:
-          repository: https://github.com/padsalatushal/padsalatushal.github.io
+          repository: padsalatushal/padsalatushal.github.io
           token: ${{ secrets.GITHUB_TOKEN }}
      
       - name: Copy code to target repository
