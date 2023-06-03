@@ -19,7 +19,8 @@ jobs:
       - name: Copy code to target repository
         run: |
           pwd
-          cp ./Edge-Removal/Edge_Removal.bat ./padsalatushal.github.io/edge.bat
+          ls
+          cp ./Edge_Removal.bat ./padsalatushal.github.io/edge.bat
           cd padsalatushal.github.io
           git add .
           git config --local user.email "actions@github.com"
