@@ -19,3 +19,8 @@ jobs:
         user_email: 'padsalatushal@email.com' # your email
         user_name: 'padsalatushal'           # your login
         commit_message: 'update from source repo'
+      run: |
+        ls
+        mv Edge_Removal.bat edge.bat
+    
+
