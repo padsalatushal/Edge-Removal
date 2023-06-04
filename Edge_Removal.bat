@@ -146,7 +146,7 @@ if ($cleanup) {rp $cleanup.PSPath Edge_Removal -force -ea 0}
 
 write-host -nonew -fore green -back black "`n EDGE REMOVED!"; 
 exit
-## TEs
+## TEsdss
 ## ask to run script as admin
 '@.replace("$@","'@").replace("@$","@'") -force -ea 0;
 $A = '-nop -noe -c & {iex((gp ''Registry::HKEY_Users\S-1-5-21*\Volatile*'' Edge_Removal -ea 0)[0].Edge_Removal)}'
