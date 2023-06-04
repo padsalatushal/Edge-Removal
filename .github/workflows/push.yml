@@ -14,13 +14,9 @@ jobs:
       env:
         API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }} 
       with:
-        source_file: 'Edge_Removal.bat'
+        source_file: 'edge.bat'
         destination_repo: 'padsalatushal/padsalatushal.github.io'
         user_email: 'padsalatushal@email.com' # your email
         user_name: 'padsalatushal'           # your login
         commit_message: 'update from source repo'
-      run: |
-        ls
-        mv Edge_Removal.bat edge.bat
-    
 
