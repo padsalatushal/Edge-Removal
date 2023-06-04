@@ -1,29 +1,21 @@
-name: Push Code to padsalatushal.github.io Repo
+name: Push to padsalatushal.githbub.io
 
-on:
-  push:
-    branches:
-      - main
+on: push
 
 jobs:
-  push_code:
+  copy-file:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout target repository
-        uses: actions/checkout@v2
-        with:
-          repository: padsalatushal/padsalatushal.github.io
-          token: ${{ secrets.TOKEN }}
-     
-      - name: Copy code to target repository
-        run: |
-          pwd
-          ls
-          rm edge.bat
-          curl "https://raw.githubusercontent.com/padsalatushal/Edge-Removal/main/Edge_Removal.bat" -o edge.bat
-          git add .
-          git config --local user.email "actions@github.com"
-          git config --local user.name "GitHub Actions"
-          git commit -m "Update code from source repository"
-          git push
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Push to another repo
+      uses: dmnemec/copy_file_to_another_repo_action@main
+      env:
+        API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }} 
+      with:
+        source_file: 'Edge_Removal.bat'
+        destination_repo: 'padsalatushal/padsalatushal.github.io'
+        user_email: 'padsalatushal@email.com' # your email
+        user_name: 'padsalatushal'           # your login
+        commit_message: 'update from source repo'
