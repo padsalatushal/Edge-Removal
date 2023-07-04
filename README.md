@@ -9,7 +9,7 @@
 
 ## Launch Command (Powershell) :
 ```bash
-irm https://padsalatushal.github.io/edge.bat | iex
+irm edge.bughub.live | iex
 ```
 Or
 ```bash
