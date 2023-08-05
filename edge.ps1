@@ -4,7 +4,7 @@ $remove_win32 = "Microsoft Edge", "Microsoft Edge Update", "Microsoft EdgeWebVie
 $remove_appx = "MicrosoftEdge", "Win32WebViewHost"
 
 ## set useless policies
-foreach ($p in 'HKLM\SOFTWARE\Policies', 'HKLM\SOFTWARE', 'HKLM\SOFTWARE\WOW6432Node') {
+foreach ($p in 'HKLM:\SOFTWARE\Policies', 'HKLM:\SOFTWARE', 'HKLM:\SOFTWARE\WOW6432Node') {
     $path = "$p\Microsoft\EdgeUpdate"
     Write-Host " setting useless policies"
     Write-Host $path
@@ -16,7 +16,7 @@ foreach ($p in 'HKLM\SOFTWARE\Policies', 'HKLM\SOFTWARE', 'HKLM\SOFTWARE\WOW6432
 
 $edgeupdate = 'Microsoft\EdgeUpdate\Clients\{56EB18F8-B008-4CBD-B6D2-8C97FE7E9062}'
 
-foreach ($p in 'HKLM\SOFTWARE', 'HKLM\SOFTWARE\Wow6432Node') {
+foreach ($p in 'HKLM:\SOFTWARE', 'HKLM:\SOFTWARE\Wow6432Node') {
   $path = "$p\$edgeupdate\Commands\on-logon-autolaunch"
   Set-ItemProperty -Path $path -Name "CommandLine" -Value 'systray.exe' -Force > $null 2>&1
   $path = "$p\$edgeupdate\Commands\on-logon-startup-boost"
@@ -26,7 +26,7 @@ foreach ($p in 'HKLM\SOFTWARE', 'HKLM\SOFTWARE\Wow6432Node') {
 }
 
 ## clear win32 uninstall block
-foreach ($hk in 'HKCU', 'HKLM') {
+foreach ($hk in 'HKCU:', 'HKLM:') {
   foreach ($wow in '', '\Wow6432Node') {
     foreach ($i in $remove_win32) {
       $path = "$hk\SOFTWARE$wow\Microsoft\Windows\CurrentVersion\Uninstall\$i"
@@ -66,3 +66,128 @@ foreach ($b in $bho) {
         } catch { }
     }
 }
+
+# Clear appx uninstall block and remove
+$provisioned = Get-AppxProvisionedPackage -Online
+$appxpackage = Get-AppxPackage -AllUsers
+$store = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Appx\AppxAllUserStore'
+$store_reg = $store
+
+Write-Host "line 74"
+Write-Host $store_reg
+$users = 'S-1-5-18'
+
+if (Test-Path $store) {
+    $users += (Get-ChildItem $store | Where-Object { $_ -like '*S-1-5-21*' }).PSChildName
+}
+
+foreach ($choice in $remove_appx) {
+    if ('' -eq $choice.Trim()) { continue }
+
+    foreach ($appx in $provisioned | Where-Object { $_.PackageName -like "*$choice*" }) {
+        $PackageFamilyName = ($appxpackage | Where-Object { $_.Name -eq $appx.DisplayName }).PackageFamilyName
+        Write-Host $PackageFamilyName
+        $path = "$store_reg\Deprovisioned\$PackageFamilyName"
+        cmd /c "reg add ""$store_reg\Deprovisioned\$PackageFamilyName"" /f >nul 2>nul"
+        cmd /c "dism /online /remove-provisionedappxpackage /packagename:$($appx.PackageName) >nul 2>nul"
+        # Set-ItemProperty -Path $path -Name CommandLine -Value 'systray.exe' -Force > $null 2>&1
+        # dism /online /remove-provisionedappxpackage /packagename:$appxPackageName >$null 2>&1
+
+        #powershell -nop -c remove-appxprovisionedpackage -packagename "'$($appx.PackageName)'" -online 2>&1 >''
+    }
+
+    foreach ($appx in $appxpackage | Where-Object { $_.PackageFullName -like "*$choice*" }) {
+        $inbox = (Get-ItemProperty "$store\InboxApplications\*$($appx.Name)*").Path.PSChildName
+        $PackageFamilyName = $appx.PackageFamilyName
+        $PackageFullName = $appx.PackageFullName
+        Write-Host "LIne 98"
+        Write-Host $PackageFullName
+
+        foreach ($app in $inbox) {
+            $registryPath = "$store_reg\Deprovisioned\$PackageFamilyName"
+            Write-Host "LINE 103"
+            Write-Host $registryPath
+            cmd /c "reg delete ""$store_reg\InboxApplications\$app"" /f >nul 2>nul"
+            # Remove-ItemProperty -Path $registryPath -Name PropertyName -Force -ErrorAction SilentlyContinue
+        }
+
+        $registryPath = "$store_reg\Deprovisioned\$PackageFamilyName"
+        New-Item -Path $registryPath -Force | Out-Null
+        Write-Host "LIne 110"
+        Write-Host $registryPath
+        cmd /c "reg add ""$store_reg\Deprovisioned\$PackageFamilyName"" /f >nul 2>nul"
+
+        # Set-ItemProperty -Path $registryPath -Force -ErrorAction SilentlyContinue
+
+
+        foreach ($sid in $users) {
+            $registryPath = "$store_reg\EndOfLife\$sid\$PackageFullName"
+            # New-Item -Path $registryPath -Force | Out-Null
+            cmd /c "reg add ""$store_reg\EndOfLife\$sid\$PackageFullName"" /f >nul 2>nul"
+            # Set-ItemProperty -Path $registryPath -Force -ErrorAction SilentlyContinue
+
+        }
+        cmd /c "dism /online /set-nonremovableapppolicy /packagefamily:$PackageFamilyName /nonremovable:0 >nul 2>nul"
+        powershell -nop -c "remove-appxpackage -package '$PackageFullName' -AllUsers" 2>&1 >''
+        # dism /Online /Set-NonRemovableAppPolicy /PackageFamily:$PackageFamilyName /NonRemovable:0 >$null 2>&1
+        # Remove-AppxPackage -Package $PackageFullName -AllUsers | Out-Null
+
+        foreach ($sid in $users) {
+            $registryPath = "$store_reg\EndOfLife\$sid\$PackageFullName"
+            cmd /c "reg delete ""$store_reg\EndOfLife\$sid\$PackageFullName"" /f >nul 2>nul"
+            # Remove-Item -Path $registryPath -Force -ErrorAction SilentlyContinue            
+        }
+    }
+}
+
+## shut edge down, again
+$processesToKill = 'MicrosoftEdgeUpdate','chredge','msedge','edge','msedgewebview2','Widgets'
+
+foreach ($processName in $processesToKill) {
+    Get-Process -Name $processName -ErrorAction SilentlyContinue | ForEach-Object { Stop-Process $_ -Force }
+}
+
+# brute-run found Edge setup.exe with uninstall args
+
+$purge = '--uninstall --system-level --force-uninstall'
+if ($also_remove_webview -eq 1){
+    foreach ($s in $setup) {
+        try {
+            Start-Process -Wait $s -ArgumentList "--msedgewebview $purge"
+        } catch {
+            # Catch any errors if the process fails
+        }
+    }
+}
+foreach ($s in $setup) {
+    try {
+        Start-Process -Wait $s -ArgumentList "--msedge $purge"
+    } catch {
+        # Catch any errors if the process fails
+    }
+}
+
+# prevent latest cumulative update (LCU) failing due to non-matching EndOfLife Edge entries
+foreach ($i in $remove_appx) {
+    Get-ChildItem "$store\EndOfLife" -Recurse -ErrorAction SilentlyContinue | Where-Object { $_ -like "*${i}*" } | ForEach-Object {
+        $registryKey = $_.Name
+        if (Test-Path $registryKey) {
+            Remove-Item -Path $registryKey -Force -ErrorAction SilentlyContinue
+        }
+    }
+
+    Get-ChildItem "$store\Deleted\EndOfLife" -Recurse -ErrorAction SilentlyContinue | Where-Object { $_ -like "*${i}*" } | ForEach-Object {
+        $registryKey = $_.Name
+        if (Test-Path $registryKey) {
+            Remove-Item -Path $registryKey -Force -ErrorAction SilentlyContinue
+        }
+    }
+}
+
+# extra cleanup
+$desktop = [Environment]::GetFolderPath('Desktop')
+$appdata = [Environment]::GetFolderPath('ApplicationData')
+
+Remove-Item -Path "$appdata\Microsoft\Internet Explorer\Quick Launch\User Pinned\TaskBar\Tombstones\Microsoft Edge.lnk" -Force -ErrorAction SilentlyContinue
+Remove-Item -Path "$appdata\Microsoft\Internet Explorer\Quick Launch\Microsoft Edge.lnk" -Force -ErrorAction SilentlyContinue
+Remove-Item -Path "$desktop\Microsoft Edge.lnk" -Force -ErrorAction SilentlyContinue
