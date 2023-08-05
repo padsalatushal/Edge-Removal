@@ -191,3 +191,46 @@ $appdata = [Environment]::GetFolderPath('ApplicationData')
 Remove-Item -Path "$appdata\Microsoft\Internet Explorer\Quick Launch\User Pinned\TaskBar\Tombstones\Microsoft Edge.lnk" -Force -ErrorAction SilentlyContinue
 Remove-Item -Path "$appdata\Microsoft\Internet Explorer\Quick Launch\Microsoft Edge.lnk" -Force -ErrorAction SilentlyContinue
 Remove-Item -Path "$desktop\Microsoft Edge.lnk" -Force -ErrorAction SilentlyContinue
+
+
+$IFEO = 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options'
+$MSEP = ("$env:ProgramFiles", "$env:ProgramFiles(x86)")[[Environment]::Is64BitOperatingSystem] + '\Microsoft\Edge\Application'
+$MIN = ('--headless', '--width 1 --height 1')[([Environment]::OSVersion.Version.Build) -gt 25179]
+$CMD = "$env:systemroot\system32\conhost.exe $MIN"
+$DIR = (Get-Location).Path
+Write-Host "PRINTING dir"
+Write-Host $DIR
+
+Write-Host "printing msep"
+Write-Host $MSEP
+
+Write-Host "printing min"
+Write-Host $MIN
+
+Write-Host "printing cmd"
+Write-Host $CMD
+Write-Host "printing ifeo"
+Write-Host $IFEO
+
+
+# Set the registry keys for microsoft-edge protocol
+Set-ItemProperty -Path 'REGISTRY::HKEY_CLASSES_ROOT\microsoft-edge' -Name '(Default)' -Value 'URL:microsoft-edge' -Force
+Set-ItemProperty -Path 'REGISTRY::HKEY_CLASSES_ROOT\microsoft-edge' -Name 'URL Protocol' -Value '' -Force
+Set-ItemProperty -Path 'REGISTRY::HKEY_CLASSES_ROOT\microsoft-edge' -Name 'NoOpenWith' -Value '' -Force
+New-Item -Path 'REGISTRY::HKEY_CLASSES_ROOT\microsoft-edge\shell\open\command' -Name '(Default)' -Value "$DIR\ie_to_edge_stub.exe %1" -Force
+
+
+New-Item -Path 'REGISTRY::HKEY_CLASSES_ROOT\MSEdgeHTM'-Name 'NoOpenWith' -Value '' -Force
+New-Item -Path 'REGISTRY::HKEY_CLASSES_ROOT\MSEdgeHTM\shell\open\command' -Name '(Default)' -Value "$DIR\ie_to_edge_stub.exe %1" -Force
+
+Write-Host '226'
+# Set the registry keys for ie_to_edge_stub.exe
+New-Item -Path "$IFEO\ie_to_edge_stub.exe" -Name 'UseFilter' -Value 1 -Force
+
+New-Item -Path "$IFEO\ie_to_edge_stub.exe\0" -Name 'FilterFullPath' -Value "$DIR\ie_to_edge_stub.exe" -Force
+New-Item -Path "$IFEO\ie_to_edge_stub.exe\0" -Name 'Debugger' -Value "$CMD $DIR\OpenWebSearch.cmd" -Force
+
+# Set the registry keys for msedge.exe
+New-Item -Path "$IFEO\msedge.exe" -Name 'UseFilter' -Value 1 -Force
+New-Item -Path "$IFEO\msedge.exe\0" -Name 'FilterFullPath' -Value "$MSEP\msedge.exe" -Force
+New-Item -Path "$IFEO\msedge.exe\0" -Name 'Debugger' -Value "$CMD $DIR\OpenWebSearch.cmd" -Force
