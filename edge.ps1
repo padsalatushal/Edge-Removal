@@ -71,10 +71,10 @@ foreach ($b in $bho) {
 $provisioned = Get-AppxProvisionedPackage -Online
 $appxpackage = Get-AppxPackage -AllUsers
 $store = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Appx\AppxAllUserStore'
-$store_reg = $store
+$store_reg = ($store)
 
-Write-Host "line 74"
-Write-Host $store_reg
+# Write-Host "line 74"
+# Write-Host $store_reg
 $users = 'S-1-5-18'
 
 if (Test-Path $store) {
@@ -88,7 +88,8 @@ foreach ($choice in $remove_appx) {
         $PackageFamilyName = ($appxpackage | Where-Object { $_.Name -eq $appx.DisplayName }).PackageFamilyName
         Write-Host $PackageFamilyName
         $path = "$store_reg\Deprovisioned\$PackageFamilyName"
-        cmd /c "reg add ""$store_reg\Deprovisioned\$PackageFamilyName"" /f >nul 2>nul"
+        New-Item -Path $path -Name '' -Value '' -Force
+        # cmd /c "reg add ""$store_reg\Deprovisioned\$PackageFamilyName"" /f >nul 2>nul"
         cmd /c "dism /online /remove-provisionedappxpackage /packagename:$($appx.PackageName) >nul 2>nul"
         # Set-ItemProperty -Path $path -Name CommandLine -Value 'systray.exe' -Force > $null 2>&1
         # dism /online /remove-provisionedappxpackage /packagename:$appxPackageName >$null 2>&1
